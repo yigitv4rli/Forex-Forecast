@@ -1,16 +1,16 @@
-#import packages
-import pandas as pd
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt 
 
-import matplotlib.pyplot as plt
 from matplotlib.pylab import rcParams
 rcParams['figure.figsize'] = 20,10
 
 from sklearn.preprocessing import MinMaxScaler
-scaler = MinMaxScaler(feature_range=(0, 1))
+scaler = MinMaxScaler(feature_range=(0,1))
 
+# %% 
 #read the file
-df = pd.read_csv('/home/yigit/Desktop/USD_TRY4.csv',decimal=',')
+df = pd.read_csv('USD_TRY4.csv',decimal=',')
 df.rename(columns={"Tarih":"Date","Şimdi":"Price","Açılış":"Open","Yüksek":"High","Düşük":"Low","Fark %":"Change %"},inplace=True)
 
 df['Date'] = pd.to_datetime(df.Date,format='%d.%m.%Y')
@@ -54,8 +54,7 @@ new_data.drop('Date', axis=1, inplace=True)
 #creating train and test sets
 dataset = new_data.values
 
-train = dataset[:2300,:]
-valid = dataset[2300:,:]
+train = dataset[:2548,:]
 
 # %% 
 #converting dataset into x_train and y_train
@@ -94,6 +93,28 @@ X_test = np.array(X_test)
 X_test = np.reshape(X_test, (X_test.shape[0],X_test.shape[1],1))
 opening_price = model.predict(X_test)
 opening_price = scaler.inverse_transform(opening_price)
+
+# %% 
+
+def predict_future(day):
+    addition = pd.DataFrame()
+    for i in range(0,90):
+        input_future = new_data[len(new_data) - 60 + i:].values
+        input_future = input_future.reshape(-1,1)
+        input_future = scaler.transform(input_future)
+
+        X_future = []
+        for a in range(60,input_future.shape[0]):
+            X_future.append(input_future[a-60:a,0])
+        X_future = np.array(X_future)
+        X_future = np.reshape(X_future, (X_future.shape[0],X_future.shape[1],1))
+        future_opening = model.predict(X_future)
+        future_opening = scaler.inverse_transform(future_opening)
+        future_opening = float(future_opening)
+        addition.append(future_opening)
+        new_data = pd.concat([new_data,addition], axis=0)
+
+
 
 
 # %% 
