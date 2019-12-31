@@ -1,3 +1,4 @@
 # Forex-Prediction
 
-Using LSTM to predict changes between USD and TRY. 
+* LSTM to predict changes between USD and TRY. 
+* Base model to forecast value of currencies 
